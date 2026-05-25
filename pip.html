@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Waypoint Locator: Glass Palace</title>
+    
+    <!-- Leaflet CSS for the Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #00bcd4; /* Cyber/Tech Blue */
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --box-bg: #1e1e1e;
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--box-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+            margin-top: 1vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .riddle-box {
+            background: #2a2a2a;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            font-style: italic;
+        }
+        
+        /* Map Styles */
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 5px;
+            border: 2px solid #444;
+            margin-bottom: 15px;
+            display: none; 
+            background-color: #000;
+        }
+
+        .radar-box {
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px dashed var(--accent-color);
+            background: #000;
+            border-radius: 5px;
+        }
+        #distance {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        #status {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        #legend {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        #secret-message {
+            display: none; 
+            margin-top: 15px;
+            padding: 20px;
+            background-color: #1b5e20;
+            color: white;
+            border-radius: 5px;
+            line-height: 1.5;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+            animation: fadeIn 1.5s;
+        }
+        .answer-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: #a5d6a7;
+        }
+        
+        button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
+            transition: background 0.2s;
+        }
+        button:active {
+            background-color: #00838f;
+        }
+        .reset-btn {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            margin-top: 25px;
+        }
+        .reset-btn:active {
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Target Waypoint: Schenley</h1>
+    
+    <div class="riddle-box">
+        "I am a palace made of glass, but no king lives inside,<br>
+        Instead, a thousand breathing things with crowns of petals hide.<br>
+        I stand proudly in the park, a warm jungle in the cold,<br>
+        Find my threshold, where nature’s stories unfold."
+    </div>
+    
+    <button id="start-btn" onclick="startTracking()">Initialize Nav-System</button>
+
+    <!-- The Map -->
+    <div id="map"></div>
+
+    <!-- The Tracker Data -->
+    <div class="radar-box">
+        <div id="status">Awaiting Initialization...</div>
+        <div id="distance">-- m</div>
+        <div id="legend">🧊 Freezing &nbsp; ❄️ Cold &nbsp; 🟡 Warm &nbsp; 🔥 Hot</div>
+    </div>
+
+    <!-- The Secret Message -->
+    <div id="secret-message">
+        <div class="answer-title">Waypoint Reached</div>
+        <p><strong>Answer: Phipps Conservatory!</strong></p>
+        <p>You have successfully navigated to the entrance plaza of Phipps Conservatory and Botanical Gardens.</p>
+        <p><em>System field test complete. Memory logged. Awaiting further directives...</em></p>
+    </div>
+
+    <!-- System Reset -->
+    <button class="reset-btn" onclick="resetSystem()">[ Clear System Memory ]</button>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // --- SETTINGS ---
+    const targetLat = 40.438843; 
+    const targetLon = -79.947820;
+    const unlockRadius = 25; 
+
+    // --- VARIABLES ---
+    const distanceDisplay = document.getElementById('distance');
+    const statusDisplay = document.getElementById('status');
+    const secretMessage = document.getElementById('secret-message');
+    const startBtn = document.getElementById('start-btn');
+    const mapDiv = document.getElementById('map');
+    const legend = document.getElementById('legend');
+    
+    let watchId = null;
+    let map = null;
+    let playerMarker = null;
+    
+    // Persistent Storage Setup
+    let pathHistory = JSON.parse(localStorage.getItem('phipps_trail')) || [];
+    let isUnlocked = localStorage.getItem('phipps_unlocked') === 'true';
+
+    // Hot/Cold colors
+    const colors = {
+        freezing: '#2196f3',
+        cold: '#4dd0e1',    
+        warm: '#ffeb3b',    
+        hot: '#f44336',     
+        arrived: '#4caf50'  
+    };
+
+    // Auto-resume if history exists
+    window.onload = function() {
+        if (isUnlocked) {
+            secretMessage.style.display = "block";
+            statusDisplay.innerText = "Waypoint Previously Reached.";
+        }
+        if (pathHistory.length > 0) {
+            startTracking(); // Bypass button if they already started before
+        }
+    };
+
+    function startTracking() {
+        if (!navigator.geolocation) {
+            statusDisplay.innerText = "Geolocation is not supported by your browser.";
+            return;
+        }
+
+        startBtn.style.display = "none";
+        statusDisplay.innerText = "Acquiring satellite lock...";
+
+        // If history exists, draw the old map immediately while waiting for new GPS ping
+        if (pathHistory.length > 0 && !map) {
+            const lastPoint = pathHistory[pathHistory.length - 1];
+            initMap(lastPoint.lat, lastPoint.lon);
+            drawHistory();
+        }
+
+        watchId = navigator.geolocation.watchPosition(
+            updateLocation, 
+            handleError, 
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+    }
+
+    function initMap(lat, lon) {
+        if (map) return; // Prevent double initialization
+
+        mapDiv.style.display = "block";
+        legend.style.display = "block";
+
+        map = L.map('map', { zoomControl: false }).setView([lat, lon], 18);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CartoDB',
+            maxZoom: 20
+        }).addTo(map);
+
+        playerMarker = L.circleMarker([lat, lon], {
+            color: '#fff',
+            weight: 2,
+            fillColor: colors.freezing,
+            fillOpacity: 1,
+            radius: 6
+        }).addTo(map);
+    }
+
+    function drawHistory() {
+        if (pathHistory.length < 2) return;
+        
+        for (let i = 1; i < pathHistory.length; i++) {
+            const p1 = pathHistory[i-1];
+            const p2 = pathHistory[i];
+            L.polyline([[p1.lat, p1.lon], [p2.lat, p2.lon]], {
+                color: p2.color, // Uses the color they had at that exact moment in the past
+                weight: 6,
+                opacity: 0.8,
+                lineCap: 'round'
+            }).addTo(map);
+        }
+    }
+
+    function getHeatColor(distance) {
+        if (distance <= unlockRadius) return colors.arrived;
+        if (distance < 60) return colors.hot;
+        if (distance < 150) return colors.warm;
+        if (distance < 350) return colors.cold;
+        return colors.freezing;
+    }
+
+    function updateLocation(position) {
+        const currentLat = position.coords.latitude;
+        const currentLon = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        const distance = calculateDistance(currentLat, currentLon, targetLat, targetLon);
+        const currentColor = getHeatColor(distance);
+        
+        const currentPoint = { lat: currentLat, lon: currentLon, color: currentColor };
+
+        if (!map) {
+            initMap(currentLat, currentLon);
+        }
+
+        playerMarker.setLatLng([currentLat, currentLon]);
+        playerMarker.setStyle({ fillColor: currentColor });
+        map.setView([currentLat, currentLon]);
+
+        // Draw line from last known point to current point
+        if (pathHistory.length > 0) {
+            const lastPoint = pathHistory[pathHistory.length - 1];
+            // Only draw/save if they actually moved to prevent massive arrays of the same spot
+            if (lastPoint.lat !== currentLat || lastPoint.lon !== currentLon) {
+                L.polyline([[lastPoint.lat, lastPoint.lon], [currentLat, currentLon]], {
+                    color: currentColor,
+                    weight: 6,
+                    opacity: 0.8,
+                    lineCap: 'round'
+                }).addTo(map);
+            }
+        }
+        
+        // Save to persistence
+        pathHistory.push(currentPoint);
+        localStorage.setItem('phipps_trail', JSON.stringify(pathHistory));
+
+        // Update UI
+        distanceDisplay.innerText = Math.round(distance) + " meters";
+        distanceDisplay.style.color = currentColor;
+        
+        if (distance <= unlockRadius) {
+            statusDisplay.innerText = "Target Confirmed.";
+            secretMessage.style.display = "block"; 
+            
+            // Save unlock state
+            localStorage.setItem('phipps_unlocked', 'true');
+            
+            map.panTo([targetLat, targetLon]);
+            navigator.geolocation.clearWatch(watchId);
+        } else {
+            if (distance < 60) statusDisplay.innerText = `🔥 HOT! You're very close! (±${Math.round(accuracy)}m)`;
+            else if (distance < 150) statusDisplay.innerText = `🟡 WARM. You're on the right track. (±${Math.round(accuracy)}m)`;
+            else if (distance < 350) statusDisplay.innerText = `❄️ COLD. Keep moving. (±${Math.round(accuracy)}m)`;
+            else statusDisplay.innerText = `🧊 FREEZING. You are far away. (±${Math.round(accuracy)}m)`;
+        }
+    }
+
+    function handleError(error) {
+        statusDisplay.innerText = "GPS Signal Lost. Step outside or check permissions.";
+        startBtn.style.display = "block"; 
+        startBtn.innerText = "Retry Connection";
+    }
+
+    function resetSystem() {
+        if(confirm("WARNING: This will wipe your navigation memory and lock the waypoint. Proceed?")) {
+            localStorage.removeItem('phipps_trail');
+            localStorage.removeItem('phipps_unlocked');
+            location.reload(); // Refresh the page to clear everything
+        }
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; 
+        const φ1 = lat1 * Math.PI/180;
+        const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180;
+        const Δλ = (lon2-lon1) * Math.PI/180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c; 
+    }
+</script>
+
+</body>
+</html>
