@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Squirrel Hill Mystery</title>
+    <title>Waypoint Locator Test</title>
+    
+    <!-- Leaflet CSS for the Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         :root {
             --bg-color: #121212;
             --text-color: #e0e0e0;
-            --accent-color: #ff9800; /* Mystery Orange */
-            --success-color: #388e3c;
+            --accent-color: #00bcd4; /* Cyber/Tech Blue */
+            --success-color: #4caf50;
             --box-bg: #1e1e1e;
         }
         body {
@@ -22,24 +26,25 @@
             justify-content: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
         .container {
-            max-width: 450px;
+            max-width: 500px;
             width: 100%;
             background: var(--box-bg);
-            padding: 25px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             border: 1px solid #333;
-            margin-top: 2vh;
+            margin-top: 1vh;
+            box-sizing: border-box;
         }
         h1 {
             color: var(--accent-color);
             font-size: 1.5rem;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
             border-bottom: 1px solid #333;
@@ -50,37 +55,57 @@
             padding: 15px;
             border-left: 4px solid var(--accent-color);
             border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 1rem;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
             line-height: 1.5;
             font-style: italic;
         }
+        
+        /* Map Styles */
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 5px;
+            border: 2px solid #444;
+            margin-bottom: 15px;
+            display: none; /* Hidden until GPS activates */
+            background-color: #000;
+        }
+
         .radar-box {
-            margin: 20px 0;
+            margin: 10px 0;
             padding: 15px;
             border: 1px dashed var(--accent-color);
             background: #000;
             border-radius: 5px;
         }
         #distance {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 5px 0;
             color: var(--text-color);
+            transition: color 0.3s;
         }
         #status {
             font-size: 0.9rem;
             color: #888;
         }
+        #legend {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 5px;
+            display: none;
+        }
+        
         #secret-message {
-            display: none; /* Hidden until they arrive */
-            margin-top: 20px;
+            display: none; 
+            margin-top: 15px;
             padding: 20px;
-            background-color: #2e7d32;
+            background-color: #1b5e20;
             color: white;
             border-radius: 5px;
             line-height: 1.5;
-            box-shadow: 0 0 15px rgba(56, 142, 60, 0.5);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
             animation: fadeIn 1.5s;
         }
         .answer-title {
@@ -88,7 +113,7 @@
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 10px;
-            color: #c8e6c9;
+            color: #a5d6a7;
         }
         button {
             background-color: var(--accent-color);
@@ -101,11 +126,11 @@
             border-radius: 5px;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 5px;
             transition: background 0.2s;
         }
         button:active {
-            background-color: #e65100;
+            background-color: #00838f;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
@@ -116,49 +141,67 @@
 <body>
 
 <div class="container">
-    <h1>Case File: Squirrel Hill</h1>
+    <h1>System Test: Local Waypoint</h1>
     
-    <!-- The Riddle -->
     <div class="riddle-box">
         "I have hands but cannot hold a weapon,<br>
         A face but cannot lie.<br>
         I stand at the crossroads of Forbes and Murray,<br>
-        Watching the town go by.<br><br>
-        Rest on a bench and look up to see the time,<br>
-        Walk to my corner to solve this crime."
+        Watching the town go by."<br><br>
+        Navigate to the subject of this riddle to complete the test.
     </div>
     
-    <button id="start-btn" onclick="startTracking()">Activate GPS Tracker</button>
+    <button id="start-btn" onclick="startTracking()">Initialize Nav-System</button>
 
-    <!-- The Tracker -->
+    <!-- The Map -->
+    <div id="map"></div>
+
+    <!-- The Tracker Data -->
     <div class="radar-box">
-        <div id="status">Waiting for GPS activation...</div>
+        <div id="status">Waiting for GPS authorization...</div>
         <div id="distance">-- m</div>
+        <div id="legend">🧊 Freezing &nbsp; ❄️ Cold &nbsp; 🟡 Warm &nbsp; 🔥 Hot</div>
     </div>
 
-    <!-- The Answer / Secret Message -->
+    <!-- The Secret Message -->
     <div id="secret-message">
-        <div class="answer-title">Answer: The Clock at O'Connor's Corner!</div>
-        <p>You made it. While sitting on the bench beneath the clock, you notice a small, folded piece of paper wedged between the wooden slats.</p>
-        <p><strong>Clue #2:</strong> "The baker knows who bought the poisoned pastry. Follow the scent of fresh bagels..."</p>
+        <div class="answer-title">Waypoint Reached</div>
+        <p><strong>Answer: A Clock!</strong></p>
+        <p>You have successfully navigated to the clock at O'Connor's Corner.</p>
+        <p><em>System field test is complete. Location-awareness protocol is functioning optimally.</em></p>
     </div>
 </div>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-    // --- GAME SETTINGS ---
-    // Coordinates for Bob O'Connor's Corner (Forbes & Murray, Squirrel Hill)
-    const targetLat = 40.437937; 
+    // --- SETTINGS ---
+    const targetLat = 40.437937; // Forbes & Murray
     const targetLon = -79.922961;
-    
-    // Unlock Radius (20 meters gives enough leeway for GPS drift and crossing the street)
     const unlockRadius = 20; 
 
-    // Variables
+    // --- VARIABLES ---
     const distanceDisplay = document.getElementById('distance');
     const statusDisplay = document.getElementById('status');
     const secretMessage = document.getElementById('secret-message');
     const startBtn = document.getElementById('start-btn');
+    const mapDiv = document.getElementById('map');
+    const legend = document.getElementById('legend');
+    
     let watchId = null;
+    let map = null;
+    let playerMarker = null;
+    let lastLatLng = null;
+
+    // Hot/Cold colors
+    const colors = {
+        freezing: '#2196f3', // Dark Blue
+        cold: '#4dd0e1',     // Light Blue
+        warm: '#ffeb3b',     // Yellow
+        hot: '#f44336',      // Red
+        arrived: '#4caf50'   // Green
+    };
 
     function startTracking() {
         if (!navigator.geolocation) {
@@ -167,18 +210,44 @@
         }
 
         startBtn.style.display = "none";
-        statusDisplay.innerText = "Connecting to satellites...";
+        statusDisplay.innerText = "Acquiring satellite lock...";
 
-        // Request continuous location updates
         watchId = navigator.geolocation.watchPosition(
             updateLocation, 
             handleError, 
-            {
-                enableHighAccuracy: true, 
-                maximumAge: 0,
-                timeout: 10000
-            }
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
         );
+    }
+
+    function initMap(lat, lon) {
+        mapDiv.style.display = "block";
+        legend.style.display = "block";
+
+        map = L.map('map', {
+            zoomControl: false 
+        }).setView([lat, lon], 18);
+
+        // Dark-mode themed map tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CartoDB',
+            maxZoom: 20
+        }).addTo(map);
+
+        playerMarker = L.circleMarker([lat, lon], {
+            color: '#fff',
+            weight: 2,
+            fillColor: colors.freezing,
+            fillOpacity: 1,
+            radius: 6
+        }).addTo(map);
+    }
+
+    function getHeatColor(distance) {
+        if (distance <= unlockRadius) return colors.arrived;
+        if (distance < 50) return colors.hot;
+        if (distance < 120) return colors.warm;
+        if (distance < 250) return colors.cold;
+        return colors.freezing;
     }
 
     function updateLocation(position) {
@@ -186,51 +255,56 @@
         const currentLon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
 
-        // Calculate distance between player and target
         const distance = calculateDistance(currentLat, currentLon, targetLat, targetLon);
+        const currentLatLng = [currentLat, currentLon];
 
-        // Update UI
+        if (!map) {
+            initMap(currentLat, currentLon);
+            lastLatLng = currentLatLng;
+        }
+
+        const currentColor = getHeatColor(distance);
+
+        playerMarker.setLatLng(currentLatLng);
+        playerMarker.setStyle({ fillColor: currentColor });
+        map.setView(currentLatLng);
+
+        if (lastLatLng[0] !== currentLatLng[0] || lastLatLng[1] !== currentLatLng[1]) {
+            L.polyline([lastLatLng, currentLatLng], {
+                color: currentColor,
+                weight: 6,
+                opacity: 0.8,
+                lineCap: 'round'
+            }).addTo(map);
+        }
+        
+        lastLatLng = currentLatLng; 
+
         distanceDisplay.innerText = Math.round(distance) + " meters";
+        distanceDisplay.style.color = currentColor;
         
         if (distance <= unlockRadius) {
-            statusDisplay.innerText = "Location Confirmed.";
-            distanceDisplay.style.color = "#388e3c";
-            secretMessage.style.display = "block"; // UNLOCK THE ANSWER
+            statusDisplay.innerText = "Target Confirmed.";
+            secretMessage.style.display = "block"; 
             
-            // Stop tracking once unlocked to save battery
+            map.panTo([targetLat, targetLon]);
             navigator.geolocation.clearWatch(watchId);
         } else {
-            // Give them a "Hot/Cold" feeling
-            if (distance < 50) {
-                statusDisplay.innerText = `You're getting very close! (Accuracy: ±${Math.round(accuracy)}m)`;
-            } else {
-                statusDisplay.innerText = `Keep moving. (Accuracy: ±${Math.round(accuracy)}m)`;
-            }
+            if (distance < 50) statusDisplay.innerText = `🔥 HOT! Almost there! (±${Math.round(accuracy)}m)`;
+            else if (distance < 120) statusDisplay.innerText = `🟡 WARM. You're on the right track. (±${Math.round(accuracy)}m)`;
+            else if (distance < 250) statusDisplay.innerText = `❄️ COLD. Keep moving. (±${Math.round(accuracy)}m)`;
+            else statusDisplay.innerText = `🧊 FREEZING. You are far away. (±${Math.round(accuracy)}m)`;
         }
     }
 
     function handleError(error) {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                statusDisplay.innerText = "Location access denied. Please allow GPS to play.";
-                break;
-            case error.POSITION_UNAVAILABLE:
-                statusDisplay.innerText = "Location signal lost. Step away from tall buildings.";
-                break;
-            case error.TIMEOUT:
-                statusDisplay.innerText = "GPS request timed out. Trying again...";
-                break;
-            default:
-                statusDisplay.innerText = "An unknown error occurred.";
-                break;
-        }
-        startBtn.style.display = "block"; // Show button again so they can retry
-        startBtn.innerText = "Retry GPS Connection";
+        statusDisplay.innerText = "GPS Signal Lost. Step outside or check permissions.";
+        startBtn.style.display = "block"; 
+        startBtn.innerText = "Retry Connection";
     }
 
-    // Haversine formula to calculate real-world distance in meters
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Earth's radius in meters
+        const R = 6371e3; 
         const φ1 = lat1 * Math.PI/180;
         const φ2 = lat2 * Math.PI/180;
         const Δφ = (lat2-lat1) * Math.PI/180;
