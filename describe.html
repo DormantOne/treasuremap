@@ -1,0 +1,1089 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phipps Plant Descriptor</title>
+  <style>
+    :root {
+      --bg: #f5f7f2;
+      --card: #ffffff;
+      --ink: #172114;
+      --muted: #5d6b57;
+      --line: #d9e1d2;
+      --accent: #2f7d32;
+      --accent-dark: #1f5b24;
+      --accent-soft: #e7f3e6;
+      --warn: #7b4f00;
+      --warn-soft: #fff6df;
+      --danger: #9b2c2c;
+      --shadow: 0 10px 25px rgba(26, 52, 25, 0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 55%, #eaf1e6 100%);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 20px 14px 8px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 4vw, 2.35rem);
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      margin: 8px auto 0;
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 20px));
+      margin: 0 auto 28px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.06fr) minmax(330px, 0.86fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    @media (max-width: 940px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 14px 15px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f8fbf6);
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .card-head small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .card-body { padding: 13px; }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    @media (max-width: 560px) {
+      .quick-grid { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: 0.88rem;
+      margin-bottom: 5px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin: 4px 0 0;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 11px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 125, 50, 0.13);
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      margin: 9px 0;
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 11px 12px;
+      font-weight: 900;
+      user-select: none;
+      background: #fbfdf9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    summary::after {
+      content: "open";
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      border: 1px solid #c7dfc5;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.74rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--line);
+      background: var(--accent-soft);
+    }
+
+    details[open] summary::after { content: "close"; }
+
+    .section-content {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .explain {
+      border-left: 4px solid var(--accent);
+      background: #f7fbf5;
+      padding: 9px 10px;
+      border-radius: 10px;
+      color: #2b3f25;
+      font-size: 0.89rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    @media (max-width: 620px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button, .link-button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      padding: 9px 13px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      touch-action: manipulation;
+    }
+
+    button:hover, .link-button:hover { background: var(--accent-dark); }
+
+    button.secondary {
+      background: #eef4ea;
+      color: var(--accent-dark);
+      border: 1px solid var(--line);
+    }
+
+    button.secondary:hover { background: #dfeada; }
+
+    button.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+      border: 1px solid #e7cf96;
+    }
+
+    button.warn:hover { background: #ffefc7; }
+
+    button.danger {
+      background: #fff0f0;
+      color: var(--danger);
+      border: 1px solid #ecc0c0;
+    }
+
+    button.danger:hover { background: #ffe1e1; }
+
+    .chip-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      border: 1px solid #cbdcc5;
+      background: #f8fbf6;
+      color: #294a25;
+      padding: 7px 9px;
+      min-height: 34px;
+      border-radius: 999px;
+      font-size: 0.83rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .chip:hover { background: var(--accent-soft); }
+
+    .chip.added {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .chip.added::after {
+      content: " ✓";
+    }
+
+    .help-pop {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(540px, calc(100% - 24px));
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(20, 45, 20, 0.25);
+      padding: 13px 14px;
+      z-index: 50;
+      display: none;
+    }
+
+    .help-pop.show { display: block; }
+
+    .help-pop strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .help-pop p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .output {
+      min-height: 330px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      min-height: 1.2em;
+    }
+
+    .pillbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 0 14px 14px;
+      justify-content: center;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.75);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .sticky {
+      position: sticky;
+      top: 10px;
+    }
+
+    @media (max-width: 940px) {
+      .sticky { position: static; }
+    }
+
+    .score-box {
+      border: 1px solid var(--line);
+      background: #fbfdf9;
+      border-radius: 15px;
+      padding: 11px;
+      margin-top: 13px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 9px 0;
+    }
+
+    .score-stat {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 9px;
+      text-align: center;
+    }
+
+    .score-stat strong {
+      display: block;
+      font-size: 1.25rem;
+      line-height: 1.1;
+    }
+
+    .score-stat span {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .history {
+      max-height: 150px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px;
+      font-size: 0.83rem;
+      color: #2a3825;
+    }
+
+    .history-item {
+      padding: 5px 0;
+      border-bottom: 1px dashed #e3ebdd;
+    }
+
+    .history-item:last-child { border-bottom: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Phipps Plant Descriptor</h1>
+    <p>Describe first. Ask for a differential diagnosis. Then score whether the real plant was in the AI's DDX.</p>
+  </header>
+
+  <div class="pillbar">
+    <span class="pill">Tap descriptor buttons</span>
+    <span class="pill">Build DDX prompt</span>
+    <span class="pill">Copy to ChatGPT</span>
+    <span class="pill">Compare answer</span>
+    <span class="pill">Persistent score</span>
+  </div>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="card-head">
+        <h2>Plant description</h2>
+        <small>Tap descriptor buttons to add/remove. Hold a button for a plain-language explanation.</small>
+      </div>
+      <div class="card-body">
+        <div class="buttons" style="margin-top:0;margin-bottom:10px;">
+          <button class="secondary" id="openAll">Open all description boxes</button>
+          <button class="secondary" id="closeAll">Close optional boxes</button>
+          <button class="warn" id="simpleMode">Open only easiest boxes</button>
+        </div>
+
+        <div class="quick-grid">
+          <div>
+            <label for="place">Where seen</label>
+            <input id="place" placeholder="Phipps Conservatory, room/gallery, outdoor bed..." />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" type="date" />
+          </div>
+          <div>
+            <label for="plantType">General plant type</label>
+            <select id="plantType">
+              <option value="">Not sure</option>
+              <option>Tree</option>
+              <option>Shrub</option>
+              <option>Vine / climber</option>
+              <option>Herbaceous plant</option>
+              <option>Grass-like plant</option>
+              <option>Fern</option>
+              <option>Succulent / cactus</option>
+              <option>Aquatic plant</option>
+              <option>Epiphyte / air plant</option>
+            </select>
+          </div>
+          <div>
+            <label for="confidence">My confidence</label>
+            <select id="confidence">
+              <option>Just observing</option>
+              <option>Some idea</option>
+              <option>Pretty confident</option>
+              <option>Need help distinguishing similar plants</option>
+            </select>
+          </div>
+        </div>
+
+        <details class="desc-box" open>
+          <summary>1. Overall shape / habit</summary>
+          <div class="section-content">
+            <div class="explain"><strong>Habit</strong> means the plant's whole-body shape: upright, trailing, climbing, rosette, tree-like, clumping, spreading.</div>
+            <div class="chip-bank" data-target="habit">
+              <button class="chip">upright</button><button class="chip">arching</button><button class="chip">trailing</button><button class="chip">climbing</button><button class="chip">rosette</button><button class="chip">clumping</button><button class="chip">tree-like</button><button class="chip">shrubby</button><button class="chip">spreading</button><button class="chip">dense</button><button class="chip">open / airy</button><button class="chip">symmetrical</button><button class="chip">irregular</button><button class="chip">small plant</button><button class="chip">large plant</button>
+            </div>
+            <textarea id="habit" placeholder="Overall shape, height, spread, upright/trailing/climbing, dense/open, rosette/clump..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box" open>
+          <summary>2. Leaves</summary>
+          <div class="section-content">
+            <div class="explain">Leaf clues are often the fastest path: shape, edge, texture, arrangement, color, veins, thickness.</div>
+            <div class="chip-bank" data-target="leaves">
+              <button class="chip">simple leaves</button><button class="chip">compound leaves</button><button class="chip">opposite leaves</button><button class="chip">alternate leaves</button><button class="chip">whorled leaves</button><button class="chip">basal rosette</button><button class="chip">oval leaves</button><button class="chip">heart-shaped leaves</button><button class="chip">long narrow leaves</button><button class="chip">round leaves</button><button class="chip">fern-like leaves</button><button class="chip">needle-like leaves</button><button class="chip">smooth edge</button><button class="chip">toothed edge</button><button class="chip">lobed leaves</button><button class="chip">wavy edge</button><button class="chip">spiny edge</button><button class="chip">glossy</button><button class="chip">waxy</button><button class="chip">fuzzy / hairy</button><button class="chip">leathery</button><button class="chip">thin / delicate</button><button class="chip">thick / succulent</button><button class="chip">variegated</button><button class="chip">strong veins</button>
+            </div>
+            <div class="row">
+              <div>
+                <label for="leafShape">Leaf shape</label>
+                <input id="leafShape" placeholder="oval, heart-shaped, lance-like, round, ferny..." />
+              </div>
+              <div>
+                <label for="leafArrangement">Leaf arrangement</label>
+                <input id="leafArrangement" placeholder="opposite, alternate, whorled, basal rosette..." />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="leafEdge">Leaf edge</label>
+                <input id="leafEdge" placeholder="smooth, toothed, lobed, wavy, spiny..." />
+              </div>
+              <div>
+                <label for="leafTexture">Leaf texture</label>
+                <input id="leafTexture" placeholder="glossy, waxy, fuzzy, leathery, thin, succulent..." />
+              </div>
+            </div>
+            <textarea id="leaves" placeholder="Extra leaf details: size, veins, color changes, variegation, smell when crushed, unusual features..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box">
+          <summary>3. Flowers</summary>
+          <div class="section-content">
+            <div class="explain">Flower clues: color, petal count, symmetry, tube/bell/daisy/orchid/pea shape, scent, and cluster pattern.</div>
+            <div class="chip-bank" data-target="flowers">
+              <button class="chip">no flowers seen</button><button class="chip">single flower</button><button class="chip">flower cluster</button><button class="chip">spike of flowers</button><button class="chip">tiny flowers</button><button class="chip">large showy flowers</button><button class="chip">white flowers</button><button class="chip">yellow flowers</button><button class="chip">purple flowers</button><button class="chip">pink flowers</button><button class="chip">red flowers</button><button class="chip">orange flowers</button><button class="chip">greenish flowers</button><button class="chip">tube-shaped</button><button class="chip">bell-shaped</button><button class="chip">daisy-like</button><button class="chip">orchid-like</button><button class="chip">pea-like</button><button class="chip">star-shaped</button><button class="chip">strong scent</button><button class="chip">no scent noticed</button>
+            </div>
+            <div class="row">
+              <div>
+                <label for="flowerColor">Flower color</label>
+                <input id="flowerColor" placeholder="white, yellow, purple, red-orange, greenish..." />
+              </div>
+              <div>
+                <label for="flowerShape">Flower shape</label>
+                <input id="flowerShape" placeholder="tube, bell, daisy-like, orchid-like, pea-like..." />
+              </div>
+            </div>
+            <textarea id="flowers" placeholder="Petals, scent, flower clusters, buds, where flowers attach, anything unusual..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box">
+          <summary>4. Fruit / seeds / cones</summary>
+          <div class="section-content">
+            <div class="explain">Fruit, seed pods, berries, cones, capsules, and seed heads can identify a plant even without flowers.</div>
+            <div class="chip-bank" data-target="fruit">
+              <button class="chip">no fruit seen</button><button class="chip">berries</button><button class="chip">seed pods</button><button class="chip">capsules</button><button class="chip">cones</button><button class="chip">dry seed head</button><button class="chip">fleshy fruit</button><button class="chip">red fruit</button><button class="chip">black fruit</button><button class="chip">green fruit</button><button class="chip">brown pods</button><button class="chip">hanging fruit</button><button class="chip">fruit in clusters</button>
+            </div>
+            <textarea id="fruit" placeholder="Berries, pods, cones, capsules, seed heads, color, size, texture, location on plant..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box">
+          <summary>5. Stem / trunk / bark</summary>
+          <div class="section-content">
+            <div class="explain">Stem clues: woody vs soft, square vs round, thorns, hairs, milky sap, peeling bark, ridges, color, branching.</div>
+            <div class="chip-bank" data-target="stem">
+              <button class="chip">woody stem</button><button class="chip">soft green stem</button><button class="chip">square stem</button><button class="chip">round stem</button><button class="chip">ridged stem</button><button class="chip">hairy stem</button><button class="chip">smooth stem</button><button class="chip">thorns / spines</button><button class="chip">aerial roots</button><button class="chip">tendrils</button><button class="chip">peeling bark</button><button class="chip">mottled bark</button><button class="chip">milky sap</button><button class="chip">branching</button><button class="chip">single trunk</button>
+            </div>
+            <textarea id="stem" placeholder="Stem or trunk details: woody/soft, thorns, hairs, bark, color, branching, sap, shape..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box">
+          <summary>6. Environment / placement</summary>
+          <div class="section-content">
+            <div class="explain">Where it grows is a clue: desert room, tropical room, water edge, shaded bed, hanging basket, rock garden, greenhouse.</div>
+            <div class="chip-bank" data-target="environment">
+              <button class="chip">tropical room</button><button class="chip">desert room</button><button class="chip">orchid area</button><button class="chip">fern area</button><button class="chip">aquatic / water edge</button><button class="chip">hanging basket</button><button class="chip">potted plant</button><button class="chip">ground bed</button><button class="chip">rock garden</button><button class="chip">bright light</button><button class="chip">shade</button><button class="chip">humid</button><button class="chip">dry setting</button><button class="chip">near label but not sure</button>
+            </div>
+            <textarea id="environment" placeholder="Light, moisture, nearby plants, pot/ground/water, greenhouse room, tropical/desert/aquatic setting..."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box">
+          <summary>7. Odd details / photo notes</summary>
+          <div class="section-content">
+            <div class="explain">Odd details can be decisive: smell, spiral growth, tendrils, aerial roots, sticky leaves, dramatic markings, nearby labels.</div>
+            <div class="chip-bank" data-target="odd">
+              <button class="chip">strong smell</button><button class="chip">sticky leaves</button><button class="chip">spiral pattern</button><button class="chip">dramatic markings</button><button class="chip">two-tone leaves</button><button class="chip">spots</button><button class="chip">stripes</button><button class="chip">holes / fenestrations</button><button class="chip">aerial roots</button><button class="chip">tendrils</button><button class="chip">unusual color</button><button class="chip">photo taken</button><button class="chip">label nearby</button><button class="chip">I may be mixing two plants</button>
+            </div>
+            <textarea id="odd" placeholder="Anything strange, beautiful, suspicious, or hard to describe. Also note if you took photos."></textarea>
+          </div>
+        </details>
+
+        <details class="desc-box" open>
+          <summary>8. What I want the AI to do</summary>
+          <div class="section-content">
+            <label for="ddxCount">DDX size</label>
+            <select id="ddxCount">
+              <option>5</option>
+              <option>3</option>
+              <option>7</option>
+              <option>10</option>
+            </select>
+            <label for="suspected">Suspected name, if any</label>
+            <input id="suspected" placeholder="Optional: I think it might be..." />
+            <label for="extraQuestion">Specific question</label>
+            <textarea id="extraQuestion" placeholder="Optional: e.g. What features distinguish this from similar tropical plants?"></textarea>
+          </div>
+        </details>
+
+        <div class="buttons">
+          <button id="makePrompt">Build DDX prompt</button>
+          <button class="secondary" id="saveLocal">Save description</button>
+          <button class="secondary" id="loadLocal">Load saved</button>
+          <button class="danger" id="clearAll">Clear description</button>
+        </div>
+        <div class="status" id="status"></div>
+      </div>
+    </section>
+
+    <aside class="card sticky">
+      <div class="card-head">
+        <h2>AI DDX prompt</h2>
+        <small>Copy this into ChatGPT, then score whether the correct plant was in the DDX.</small>
+      </div>
+      <div class="card-body">
+        <textarea id="output" class="output" placeholder="Your generated plant DDX prompt will appear here..."></textarea>
+        <div class="buttons">
+          <button id="copyPrompt">Copy prompt</button>
+          <a class="link-button" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT</a>
+          <button class="secondary" id="shortPrompt">Short prompt</button>
+        </div>
+        <div class="status" id="copyStatus"></div>
+
+        <div class="score-box">
+          <h2 style="font-size:1rem;margin:0 0 8px;">Persistent DDX score</h2>
+          <div class="score-grid">
+            <div class="score-stat"><strong id="scoreTotal">0</strong><span>Total</span></div>
+            <div class="score-stat"><strong id="scoreHit">0</strong><span>In DDX</span></div>
+            <div class="score-stat"><strong id="scorePct">0%</strong><span>Hit rate</span></div>
+          </div>
+
+          <label for="correctName">Correct plant name</label>
+          <input id="correctName" placeholder="After you know it: e.g. Monstera deliciosa" />
+
+          <label for="aiDdx" style="margin-top:8px;">AI DDX / candidate list</label>
+          <textarea id="aiDdx" placeholder="Paste the AI's differential diagnosis or candidate list here."></textarea>
+
+          <div class="buttons">
+            <button id="autoCheck">Auto-check text</button>
+            <button id="recordHit">Record: in DDX</button>
+            <button class="warn" id="recordMiss">Record: not in DDX</button>
+          </div>
+          <div class="buttons">
+            <button class="secondary" id="undoScore">Undo last</button>
+            <button class="secondary" id="exportScore">Export history</button>
+            <button class="danger" id="resetScore">Reset score</button>
+          </div>
+          <div class="status" id="scoreStatus"></div>
+          <div class="history" id="historyBox">No scored attempts yet.</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="helpPop" class="help-pop" role="status" aria-live="polite">
+    <strong id="helpTitle">Descriptor</strong>
+    <p id="helpText">Hold a descriptor button to see a plain-language explanation.</p>
+  </div>
+
+  <script>
+    const ids = [
+      "place", "date", "plantType", "confidence", "habit",
+      "leafShape", "leafArrangement", "leafEdge", "leafTexture", "leaves",
+      "flowerColor", "flowerShape", "flowers", "fruit", "stem", "environment",
+      "odd", "ddxCount", "suspected", "extraQuestion"
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    function val(id) {
+      return ($(id).value || "").trim();
+    }
+
+    function addLine(lines, label, value) {
+      if (value) lines.push(`${label}: ${value}`);
+    }
+
+    const plainDefinitions = {
+      "upright": "The plant mainly grows upward rather than hanging, crawling, or spreading sideways.",
+      "arching": "Stems or leaves curve outward and downward like a fountain.",
+      "trailing": "The plant hangs or creeps over an edge or along the ground.",
+      "climbing": "The plant grows upward using a support, tendrils, twining stems, or aerial roots.",
+      "rosette": "Leaves form a circular cluster from the center, like a rose shape.",
+      "clumping": "The plant grows as a bunch or mound with many stems close together.",
+      "tree-like": "The plant has one or more woody trunks and a canopy-like top.",
+      "shrubby": "Woody and bush-like, with several branches from near the base.",
+      "spreading": "The plant grows wider across the ground or bed rather than mostly upward.",
+      "dense": "Leaves and stems are packed closely together; you cannot easily see through it.",
+      "open / airy": "There is visible space between leaves or branches; the plant looks loose rather than packed.",
+      "symmetrical": "The plant has a balanced, regular shape.",
+      "irregular": "The plant has an uneven or asymmetrical shape.",
+      "small plant": "The plant is noticeably small compared with nearby plants.",
+      "large plant": "The plant is large or dominant in the display.",
+      "simple leaves": "Each leaf is one undivided blade.",
+      "compound leaves": "One leaf is divided into several smaller leaflets.",
+      "opposite leaves": "Leaves come out in pairs directly across from each other on the stem.",
+      "alternate leaves": "Leaves take turns along the stem rather than forming opposite pairs.",
+      "whorled leaves": "Three or more leaves come out from the same point around the stem.",
+      "basal rosette": "Most leaves come from the base of the plant in a circular cluster.",
+      "oval leaves": "Leaves are egg-shaped or rounded-oval.",
+      "heart-shaped leaves": "Leaves have a heart-like outline, often with a notch near the stem.",
+      "long narrow leaves": "Leaves are much longer than they are wide, like a blade or lance.",
+      "round leaves": "Leaves are close to circular.",
+      "fern-like leaves": "Leaves look feathery or finely divided, like a fern.",
+      "needle-like leaves": "Leaves are thin, stiff, and pointed like needles.",
+      "smooth edge": "The leaf edge is even, without teeth, lobes, or spines.",
+      "toothed edge": "The leaf edge has small saw-like points.",
+      "lobed leaves": "Leaves have big rounded or pointed projections, like oak or maple leaves.",
+      "wavy edge": "The leaf edge ripples gently rather than staying flat.",
+      "spiny edge": "The leaf edge has sharp points or prickles.",
+      "glossy": "The surface is shiny and reflects light.",
+      "waxy": "The surface looks coated, thick, or water-repellent.",
+      "fuzzy / hairy": "The surface has visible fine hairs or feels soft/fuzzy.",
+      "leathery": "The leaf feels tough, firm, or thick.",
+      "thin / delicate": "The leaf looks fragile, papery, or easily torn.",
+      "thick / succulent": "The leaf or stem is fleshy and stores water.",
+      "variegated": "Leaves have more than one color, often green plus white, yellow, or cream.",
+      "strong veins": "The leaf veins stand out clearly by color, depth, or raised texture.",
+      "no flowers seen": "You did not see flowers on this plant. That is still useful information.",
+      "single flower": "Flowers appear one at a time rather than in clusters.",
+      "flower cluster": "Many flowers are grouped together in one bunch or head.",
+      "spike of flowers": "Flowers are arranged along a tall central stalk.",
+      "tiny flowers": "The flowers are small and may be easy to overlook.",
+      "large showy flowers": "Flowers are big, colorful, and visually dominant.",
+      "white flowers": "The flowers appear white or mostly white.",
+      "yellow flowers": "The flowers appear yellow or mostly yellow.",
+      "purple flowers": "The flowers appear purple or violet.",
+      "pink flowers": "The flowers appear pink.",
+      "red flowers": "The flowers appear red.",
+      "orange flowers": "The flowers appear orange.",
+      "greenish flowers": "The flowers are green or blend into the plant.",
+      "tube-shaped": "The flower is shaped like a tube or trumpet.",
+      "bell-shaped": "The flower hangs or opens like a bell.",
+      "daisy-like": "The flower has a central disk with petal-like rays around it.",
+      "orchid-like": "The flower is complex and bilaterally symmetrical, like an orchid.",
+      "pea-like": "The flower resembles a pea or bean flower.",
+      "star-shaped": "The flower opens into a star-like shape.",
+      "strong scent": "The plant or flower has a noticeable smell.",
+      "no scent noticed": "You did not notice a smell.",
+      "berries": "Small fleshy fruits, often round.",
+      "seed pods": "A pod-like structure that contains seeds.",
+      "capsules": "A dry fruit that opens to release seeds.",
+      "cones": "Cone-like reproductive structures, usually woody or scaly.",
+      "dry seed head": "A dried cluster where seeds remain after flowering.",
+      "fleshy fruit": "Fruit looks soft or juicy rather than dry or woody.",
+      "woody stem": "The stem is hard and wood-like.",
+      "soft green stem": "The stem is flexible, green, and not woody.",
+      "square stem": "The stem has four sides or corners.",
+      "round stem": "The stem is cylindrical without obvious corners.",
+      "ridged stem": "The stem has lengthwise grooves or raised lines.",
+      "hairy stem": "The stem has visible fine hairs.",
+      "smooth stem": "The stem looks or feels smooth, without hairs or ridges.",
+      "thorns / spines": "Sharp structures are present on the plant.",
+      "aerial roots": "Roots grow above ground or from the stem into the air.",
+      "tendrils": "Thin curling structures grab onto supports for climbing.",
+      "peeling bark": "Outer bark flakes or strips away.",
+      "mottled bark": "Bark has patchy mixed colors or patterns.",
+      "milky sap": "White liquid appears if the plant is cut or damaged. Do not taste it.",
+      "branching": "The stem divides into multiple branches.",
+      "single trunk": "The plant has one main trunk or central stem.",
+      "tropical room": "The plant was in a warm, humid, tropical-style area.",
+      "desert room": "The plant was in a dry cactus/succulent-style area.",
+      "orchid area": "It was near orchids or in a display focused on orchids/epiphytes.",
+      "fern area": "It was near ferns or in a shaded, humid fern-like area.",
+      "aquatic / water edge": "It was growing in water or right next to water.",
+      "hanging basket": "The plant was suspended above ground in a basket or hanging container.",
+      "potted plant": "It was growing in a pot rather than directly in a bed.",
+      "ground bed": "It was planted directly in a display bed or soil area.",
+      "rock garden": "It was growing among rocks, gravel, or a dry rocky display.",
+      "bright light": "The plant was in strong light or near a sunny area.",
+      "shade": "The plant was in lower light or under other plants.",
+      "humid": "The area felt moist or greenhouse-tropical.",
+      "dry setting": "The area felt dry or desert-like.",
+      "near label but not sure": "A label was nearby, but you are not certain it belonged to this exact plant.",
+      "sticky leaves": "The leaves felt sticky or looked like they had residue.",
+      "spiral pattern": "Leaves, stems, or flowers were arranged in a visible spiral.",
+      "dramatic markings": "The plant had striking marks, colors, spots, or patterns.",
+      "two-tone leaves": "Leaves had two main colors or a clear contrast pattern.",
+      "spots": "Leaves, stems, or flowers had spot-like markings.",
+      "stripes": "Leaves, stems, or flowers had stripe-like markings.",
+      "holes / fenestrations": "Leaves have natural splits or holes, like some Monstera leaves.",
+      "unusual color": "The plant had a color that stood out from normal green.",
+      "photo taken": "You have a photo that could help confirm the identification.",
+      "label nearby": "A plant label was nearby and may help, but may not match this exact plant.",
+      "I may be mixing two plants": "You are not sure all observed features came from the same plant; this warns the AI not to overfit."
+    };
+
+    function splitParts(text) {
+      return text.split(",").map(s => s.trim()).filter(Boolean);
+    }
+
+    function appendToField(id, text, chip) {
+      const cleanText = text.replace(" ✓", "").trim();
+      const field = $(id);
+      const parts = splitParts(field.value);
+      const lower = cleanText.toLowerCase();
+      const already = parts.some(p => p.toLowerCase() === lower);
+
+      if (already || chip.classList.contains("added")) {
+        field.value = parts.filter(p => p.toLowerCase() !== lower).join(", ");
+        chip.classList.remove("added");
+      } else {
+        parts.push(cleanText);
+        field.value = parts.join(", ");
+        chip.classList.add("added");
+      }
+
+      if ($("output").value.trim()) buildPrompt(false);
+    }
+
+    function plainExplain(text) {
+      const cleanText = text.replace(" ✓", "").trim();
+      return plainDefinitions[cleanText] || `Use this descriptor if "${cleanText}" visually matches what you see. Tap to add it; tap again to remove it from the description.`;
+    }
+
+    function showHelp(title, text) {
+      $("helpTitle").textContent = title;
+      $("helpText").textContent = text;
+      $("helpPop").classList.add("show");
+      clearTimeout(showHelp.timer);
+      showHelp.timer = setTimeout(() => $("helpPop").classList.remove("show"), 4200);
+    }
+
+    function refreshChipStates() {
+      document.querySelectorAll(".chip-bank").forEach(bank => {
+        const target = bank.dataset.target;
+        const parts = splitParts($(target).value).map(p => p.toLowerCase());
+        bank.querySelectorAll(".chip").forEach(chip => {
+          const text = chip.textContent.replace(" ✓", "").trim().toLowerCase();
+          chip.classList.toggle("added", parts.includes(text));
+        });
+      });
+    }
+
+    function buildPrompt(shortMode = false) {
+      const lines = [];
+      const count = val("ddxCount") || "5";
+      lines.push("I am trying to identify a plant from a field description. Please give a differential diagnosis, not just one answer.");
+      lines.push("");
+      lines.push(`Task: Give the top ${count} most likely plant identifications as a DDX. Rank them from most to least likely. For each candidate, say what supports it, what argues against it, and what single observation or photo would best distinguish it from the others.`);
+      lines.push("");
+      lines.push("Important: separate direct observations from interpretation. If the description is insufficient, still give a reasonable DDX and explain uncertainty.");
+      addLine(lines, "Where seen", val("place"));
+      addLine(lines, "Date", val("date"));
+      addLine(lines, "General plant type", val("plantType"));
+      addLine(lines, "My confidence", val("confidence"));
+      addLine(lines, "Suspected name", val("suspected"));
+      addLine(lines, "Specific question", val("extraQuestion"));
+      lines.push("");
+      lines.push("Plant description:");
+      addLine(lines, "Overall habit / shape", val("habit"));
+      addLine(lines, "Leaf shape", val("leafShape"));
+      addLine(lines, "Leaf arrangement", val("leafArrangement"));
+      addLine(lines, "Leaf edge", val("leafEdge"));
+      addLine(lines, "Leaf texture", val("leafTexture"));
+      addLine(lines, "Additional leaf details", val("leaves"));
+      addLine(lines, "Flower color", val("flowerColor"));
+      addLine(lines, "Flower shape", val("flowerShape"));
+      addLine(lines, "Additional flower details", val("flowers"));
+      addLine(lines, "Fruit / seeds / cones", val("fruit"));
+      addLine(lines, "Stem / trunk / bark", val("stem"));
+      addLine(lines, "Environment / placement", val("environment"));
+      addLine(lines, "Odd details / photo notes", val("odd"));
+
+      if (!shortMode) {
+        lines.push("");
+        lines.push("Please answer in this exact structure:");
+        lines.push(`1. Ranked DDX table with ${count} candidates`);
+        lines.push("2. Best supporting features for each candidate");
+        lines.push("3. Features that argue against each candidate");
+        lines.push("4. One most useful missing detail or photo angle");
+        lines.push("5. Beginner-friendly botanical vocabulary for the features described");
+        lines.push("6. Search terms I should use to confirm the ID");
+      }
+
+      const cleaned = lines.filter((line, idx, arr) => {
+        if (line.trim() !== "") return true;
+        return idx > 0 && arr[idx - 1].trim() !== "";
+      }).join("\n");
+
+      $("output").value = cleaned;
+      $("status").textContent = shortMode ? "Short DDX prompt built." : "DDX prompt built.";
+    }
+
+    function saveLocal() {
+      const data = {};
+      ids.forEach(id => data[id] = $(id).value);
+      localStorage.setItem("phippsPlantDescriptor", JSON.stringify(data));
+      $("status").textContent = "Description saved in this browser.";
+    }
+
+    function loadLocal() {
+      const raw = localStorage.getItem("phippsPlantDescriptor");
+      if (!raw) {
+        $("status").textContent = "No saved plant description found.";
+        return;
+      }
+      const data = JSON.parse(raw);
+      ids.forEach(id => { if (data[id] !== undefined) $(id).value = data[id]; });
+      refreshChipStates();
+      $("status").textContent = "Loaded saved plant description.";
+      buildPrompt(false);
+    }
+
+    function clearAll() {
+      if (!confirm("Clear all plant description fields?")) return;
+      ids.forEach(id => $(id).value = "");
+      $("confidence").value = "Just observing";
+      $("ddxCount").value = "5";
+      $("output").value = "";
+      document.querySelectorAll(".chip.added").forEach(chip => chip.classList.remove("added"));
+      $("status").textContent = "Description cleared.";
+      $("copyStatus").textContent = "";
+    }
+
+    async function copyPrompt() {
+      const text = $("output").value.trim();
+      if (!text) {
+        $("copyStatus").textContent = "Build a DDX prompt first.";
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        $("copyStatus").textContent = "Copied. Paste into ChatGPT.";
+      } catch (err) {
+        $("output").select();
+        document.execCommand("copy");
+        $("copyStatus").textContent = "Copied using fallback. Paste into ChatGPT.";
+      }
+    }
+
+    function setToday() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      if (!val("date")) $("date").value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getScoreHistory() {
+      try { return JSON.parse(localStorage.getItem("phippsDdxScoreHistory") || "[]"); }
+      catch { return []; }
+    }
+
+    function setScoreHistory(history) {
+      localStorage.setItem("phippsDdxScoreHistory", JSON.stringify(history));
+      renderScore();
+    }
+
+    function renderScore() {
+      const history = getScoreHistory();
+      const total = history.length;
+      const hits = history.filter(x => x.hit).length;
+      const pct = total ? Math.round((hits / total) * 100) : 0;
+      $("scoreTotal").textContent = total;
+      $("scoreHit").textContent = hits;
+      $("scorePct").textContent = pct + "%";
+      if (!total) {
+        $("historyBox").textContent = "No scored attempts yet.";
+        return;
+      }
+      $("historyBox").innerHTML = history.slice().reverse().map(item => {
+        const mark = item.hit ? "✅ in DDX" : "❌ not in DDX";
+        const name = item.correctName || "unnamed plant";
+        const date = item.date || "";
+        return `<div class="history-item"><strong>${mark}</strong> — ${escapeHtml(name)} <br><span style="color:#65745e;">${escapeHtml(date)}</span></div>`;
+      }).join("");
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
+    }
+
+    function recordScore(hit) {
+      const history = getScoreHistory();
+      const item = {
+        hit,
+        correctName: val("correctName"),
+        aiDdx: val("aiDdx"),
+        place: val("place"),
+        description: val("output"),
+        date: new Date().toLocaleString()
+      };
+      history.push(item);
+      setScoreHistory(history);
+      $("scoreStatus").textContent = hit ? "Recorded as IN the DDX." : "Recorded as NOT in the DDX.";
+    }
+
+    function autoCheck() {
+      const correct = val("correctName").toLowerCase();
+      const ddx = val("aiDdx").toLowerCase();
+      if (!correct || !ddx) {
+        $("scoreStatus").textContent = "Enter the correct plant name and paste the AI DDX first.";
+        return;
+      }
+      const words = correct.split(/\s+/).filter(Boolean);
+      const genus = words[0] || "";
+      const species = words.slice(0, 2).join(" ");
+      const hit = ddx.includes(correct) || (species.length > 4 && ddx.includes(species)) || (genus.length > 4 && ddx.includes(genus));
+      $("scoreStatus").textContent = hit ? "Auto-check thinks it WAS in the DDX. Review, then record." : "Auto-check thinks it was NOT in the DDX. Review, then record.";
+    }
+
+    function undoScore() {
+      const history = getScoreHistory();
+      if (!history.length) {
+        $("scoreStatus").textContent = "Nothing to undo.";
+        return;
+      }
+      history.pop();
+      setScoreHistory(history);
+      $("scoreStatus").textContent = "Last score removed.";
+    }
+
+    function resetScore() {
+      if (!confirm("Reset the persistent DDX score history?")) return;
+      setScoreHistory([]);
+      $("scoreStatus").textContent = "Score reset.";
+    }
+
+    function exportScore() {
+      const history = getScoreHistory();
+      const blob = new Blob([JSON.stringify(history, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "phipps-ddx-score-history.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      $("scoreStatus").textContent = "Score history exported.";
+    }
+
+    function setDetails(mode) {
+      const boxes = Array.from(document.querySelectorAll("details.desc-box"));
+      boxes.forEach((box, idx) => {
+        if (mode === "open") box.open = true;
+        if (mode === "close") box.open = idx === 0 || idx === 1 || idx === boxes.length - 1;
+        if (mode === "simple") box.open = [0, 1, 5, 6, 7].includes(idx);
+      });
+    }
+
+    document.querySelectorAll(".chip-bank").forEach(bank => {
+      const target = bank.dataset.target;
+      bank.querySelectorAll(".chip").forEach(chip => {
+        let holdTimer = null;
+        chip.addEventListener("pointerdown", () => {
+          chip.dataset.suppressClick = "0";
+          holdTimer = setTimeout(() => {
+            chip.dataset.suppressClick = "1";
+            const text = chip.textContent.replace(" ✓", "").trim();
+            showHelp(text, plainExplain(text));
+          }, 520);
+        });
+        ["pointerup", "pointerleave", "pointercancel"].forEach(evt => {
+          chip.addEventListener(evt, () => clearTimeout(holdTimer));
+        });
+        chip.addEventListener("contextmenu", e => e.preventDefault());
+        chip.addEventListener("click", () => {
+          const text = chip.textContent.replace(" ✓", "").trim();
+          if (chip.dataset.suppressClick === "1") {
+            chip.dataset.suppressClick = "0";
+            return;
+          }
+          appendToField(target, text, chip);
+        });
+      });
+    });
+
+    $("makePrompt").addEventListener("click", () => buildPrompt(false));
+    $("shortPrompt").addEventListener("click", () => buildPrompt(true));
+    $("copyPrompt").addEventListener("click", copyPrompt);
+    $("saveLocal").addEventListener("click", saveLocal);
+    $("loadLocal").addEventListener("click", loadLocal);
+    $("clearAll").addEventListener("click", clearAll);
+    $("openAll").addEventListener("click", () => setDetails("open"));
+    $("closeAll").addEventListener("click", () => setDetails("close"));
+    $("simpleMode").addEventListener("click", () => setDetails("simple"));
+    $("recordHit").addEventListener("click", () => recordScore(true));
+    $("recordMiss").addEventListener("click", () => recordScore(false));
+    $("autoCheck").addEventListener("click", autoCheck);
+    $("undoScore").addEventListener("click", undoScore);
+    $("resetScore").addEventListener("click", resetScore);
+    $("exportScore").addEventListener("click", exportScore);
+
+    ids.forEach(id => {
+      $(id).addEventListener("input", () => {
+        if ($("output").value.trim()) buildPrompt(false);
+      });
+    });
+
+    setToday();
+    refreshChipStates();
+    renderScore();
+  </script>
+</body>
+</html>
