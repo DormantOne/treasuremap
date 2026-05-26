@@ -1,24 +1,39 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Waypoint Locator Test</title>
-    
+
     <!-- Leaflet CSS for the Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
         :root {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --accent-color: #00bcd4; /* Cyber/Tech Blue */
+            --bg-color: #071018;
+            --text-color: #eef8ff;
+            --accent-color: #00e5ff;
             --success-color: #4caf50;
-            --box-bg: #1e1e1e;
+            --box-bg: rgba(10, 18, 28, 0.94);
+
+            --freezing: #2196f3;
+            --cold: #4dd0e1;
+            --warm: #ffe44d;
+            --hot: #ff3b30;
+            --arrived: #4caf50;
+
+            --heat-color: var(--freezing);
+            --heat-glow: rgba(33, 150, 243, 0.65);
         }
+
+        * { box-sizing: border-box; }
+
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: var(--bg-color);
+            background:
+                radial-gradient(circle at top, rgba(0,229,255,0.12), transparent 35%),
+                linear-gradient(180deg, #071018 0%, #02040a 100%);
             color: var(--text-color);
             display: flex;
             flex-direction: column;
@@ -29,17 +44,94 @@
             padding: 15px;
             text-align: center;
         }
+
+        body.heat-freezing {
+            --heat-color: var(--freezing);
+            --heat-glow: rgba(33, 150, 243, 0.65);
+        }
+        body.heat-cold {
+            --heat-color: var(--cold);
+            --heat-glow: rgba(77, 208, 225, 0.68);
+        }
+        body.heat-warm {
+            --heat-color: var(--warm);
+            --heat-glow: rgba(255, 228, 77, 0.72);
+        }
+        body.heat-hot {
+            --heat-color: var(--hot);
+            --heat-glow: rgba(255, 59, 48, 0.82);
+        }
+        body.heat-arrived {
+            --heat-color: var(--arrived);
+            --heat-glow: rgba(76, 175, 80, 0.9);
+        }
+
+        .top-notice {
+            position: fixed;
+            top: max(10px, env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-140%);
+            z-index: 9999;
+            width: min(92vw, 520px);
+            padding: 14px 16px;
+            background: rgba(5, 20, 8, 0.96);
+            border: 2px solid var(--arrived);
+            border-radius: 14px;
+            color: #ecffef;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.95);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .top-notice.show {
+            animation: noticeDrop 4.5s ease-in-out forwards;
+        }
+
+        @keyframes noticeDrop {
+            0%   { opacity: 0; transform: translateX(-50%) translateY(-140%); }
+            10%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+            20%  { box-shadow: 0 0 8px rgba(76, 175, 80, 0.6), 0 0 55px rgba(255,255,255,0.9); }
+            32%  { box-shadow: 0 0 40px rgba(76, 175, 80, 1); }
+            46%  { box-shadow: 0 0 10px rgba(76, 175, 80, 0.6), 0 0 70px rgba(255,255,255,0.85); }
+            72%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-140%); }
+        }
+
         .container {
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             background: var(--box-bg);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            border: 1px solid #333;
+            border-radius: 16px;
+            border: 2px solid var(--heat-color);
             margin-top: 1vh;
             box-sizing: border-box;
+            box-shadow:
+                0 0 18px var(--heat-glow),
+                0 0 48px rgba(0,0,0,0.8),
+                inset 0 0 18px rgba(255,255,255,0.035);
+            transition: border-color 0.35s ease, box-shadow 0.35s ease;
         }
+
+        body.arrival-flash .container,
+        body.arrival-flash #map {
+            animation: arrivalFlash 1.2s linear 4;
+        }
+
+        @keyframes arrivalFlash {
+            0%, 100% {
+                border-color: var(--arrived);
+                box-shadow: 0 0 18px rgba(76,175,80,0.8), 0 0 42px rgba(76,175,80,0.5);
+            }
+            50% {
+                border-color: #ffffff;
+                box-shadow: 0 0 18px rgba(255,255,255,1), 0 0 76px rgba(76,175,80,1);
+            }
+        }
+
         h1 {
             color: var(--accent-color);
             font-size: 1.5rem;
@@ -47,102 +139,155 @@
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(255,255,255,0.14);
             padding-bottom: 10px;
+            text-shadow: 0 0 12px rgba(0,229,255,0.55);
         }
+
         .riddle-box {
-            background: #2a2a2a;
+            background: rgba(255,255,255,0.07);
             padding: 15px;
             border-left: 4px solid var(--accent-color);
-            border-radius: 4px;
+            border-radius: 10px;
             margin-bottom: 15px;
             font-size: 0.95rem;
             line-height: 1.5;
             font-style: italic;
+            text-align: left;
         }
-        
-        /* Map Styles */
-        #map {
-            height: 300px;
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 430px) {
+            .button-row {
+                grid-template-columns: 1fr 0.72fr;
+            }
+        }
+
+        button {
+            background: linear-gradient(180deg, #75f4ff, var(--accent-color));
+            color: #001015;
+            border: none;
+            padding: 14px 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 10px;
+            cursor: pointer;
             width: 100%;
-            border-radius: 5px;
-            border: 2px solid #444;
+            transition: transform 0.08s ease, filter 0.2s ease, background 0.2s ease;
+            box-shadow: 0 0 18px rgba(0,229,255,0.22);
+        }
+
+        button:active {
+            transform: translateY(1px) scale(0.99);
+            filter: brightness(0.86);
+        }
+
+        .reset-btn {
+            background: linear-gradient(180deg, #26384a, #152230);
+            color: #d9f5ff;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        /* Brighter map */
+        #map {
+            height: 330px;
+            width: 100%;
+            border-radius: 12px;
+            border: 3px solid var(--heat-color);
             margin-bottom: 15px;
-            display: none; /* Hidden until GPS activates */
-            background-color: #000;
+            display: none;
+            background-color: #d8eef7;
+            box-shadow:
+                0 0 18px var(--heat-glow),
+                0 0 48px rgba(255,255,255,0.08),
+                inset 0 0 16px rgba(255,255,255,0.12);
+            overflow: hidden;
+            transition: border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .leaflet-tile-pane {
+            filter: saturate(1.25) contrast(1.05) brightness(1.08);
         }
 
         .radar-box {
             margin: 10px 0;
             padding: 15px;
-            border: 1px dashed var(--accent-color);
-            background: #000;
-            border-radius: 5px;
+            border: 1px dashed var(--heat-color);
+            background: rgba(0,0,0,0.64);
+            border-radius: 12px;
+            box-shadow: inset 0 0 22px rgba(255,255,255,0.04), 0 0 16px var(--heat-glow);
+            transition: border-color 0.35s ease, box-shadow 0.35s ease;
         }
+
         #distance {
             font-size: 2rem;
             font-weight: bold;
             margin: 5px 0;
-            color: var(--text-color);
-            transition: color 0.3s;
+            color: var(--heat-color);
+            text-shadow: 0 0 14px var(--heat-glow);
+            transition: color 0.3s, text-shadow 0.3s;
         }
+
         #status {
             font-size: 0.9rem;
-            color: #888;
+            color: #cae9f4;
         }
+
         #legend {
             font-size: 0.75rem;
-            color: #aaa;
-            margin-top: 5px;
+            color: #d3e8ef;
+            margin-top: 7px;
             display: none;
         }
-        
+
+        .persist-note {
+            font-size: 0.72rem;
+            color: #a6c6cf;
+            margin-top: 8px;
+        }
+
         #secret-message {
-            display: none; 
+            display: none;
             margin-top: 15px;
             padding: 20px;
-            background-color: #1b5e20;
+            background: linear-gradient(180deg, #1b5e20, #0d3d12);
             color: white;
-            border-radius: 5px;
+            border-radius: 12px;
             line-height: 1.5;
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 0 22px rgba(76, 175, 80, 0.46);
             animation: fadeIn 1.5s;
+            border: 1px solid rgba(255,255,255,0.18);
         }
+
         .answer-title {
             font-size: 1.2rem;
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 10px;
-            color: #a5d6a7;
+            color: #cbffd1;
+            letter-spacing: 1px;
         }
-        button {
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
-            padding: 15px 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 5px;
-            transition: background 0.2s;
-        }
-        button:active {
-            background-color: #00838f;
-        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
-<body>
+<body class="heat-freezing">
 
-<div class="container">
+<div id="top-notice" class="top-notice">Waypoint reached</div>
+
+<div class="container" id="app-frame">
     <h1>System Test: Local Waypoint</h1>
-    
+
     <div class="riddle-box">
         "I have hands but cannot hold a weapon,<br>
         A face but cannot lie.<br>
@@ -150,8 +295,11 @@
         Watching the town go by."<br><br>
         Navigate to the subject of this riddle to complete the test.
     </div>
-    
-    <button id="start-btn" onclick="startTracking()">Initialize Nav-System</button>
+
+    <div class="button-row">
+        <button id="start-btn" onclick="startTracking()">Initialize Nav-System</button>
+        <button id="reset-btn" class="reset-btn" onclick="resetMission()">Reset Mission</button>
+    </div>
 
     <!-- The Map -->
     <div id="map"></div>
@@ -160,7 +308,8 @@
     <div class="radar-box">
         <div id="status">Waiting for GPS authorization...</div>
         <div id="distance">-- m</div>
-        <div id="legend">🧊 Freezing &nbsp; ❄️ Cold &nbsp; 🟡 Warm &nbsp; 🔥 Hot</div>
+        <div id="legend">🧊 Freezing &nbsp; ❄️ Cold &nbsp; 🟡 Warm &nbsp; 🔥 Hot &nbsp; ✅ There</div>
+        <div class="persist-note">Trail and completion state save on this device until reset.</div>
     </div>
 
     <!-- The Secret Message -->
@@ -179,29 +328,107 @@
     // --- SETTINGS ---
     const targetLat = 40.437937; // Forbes & Murray
     const targetLon = -79.922961;
-    const unlockRadius = 20; 
+    const unlockRadius = 20;
+    const STORAGE_KEY = "waypoint_locator_test_state_v2";
+    const MAX_PATH_POINTS = 800;
 
-    // --- VARIABLES ---
+    // --- ELEMENTS ---
     const distanceDisplay = document.getElementById('distance');
     const statusDisplay = document.getElementById('status');
     const secretMessage = document.getElementById('secret-message');
     const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
     const mapDiv = document.getElementById('map');
     const legend = document.getElementById('legend');
-    
+    const topNotice = document.getElementById('top-notice');
+
+    // --- VARIABLES ---
     let watchId = null;
     let map = null;
     let playerMarker = null;
+    let targetMarker = null;
     let lastLatLng = null;
+    let missionState = loadState();
 
     // Hot/Cold colors
     const colors = {
-        freezing: '#2196f3', // Dark Blue
-        cold: '#4dd0e1',     // Light Blue
-        warm: '#ffeb3b',     // Yellow
-        hot: '#f44336',      // Red
-        arrived: '#4caf50'   // Green
+        freezing: '#2196f3',
+        cold: '#4dd0e1',
+        warm: '#ffe44d',
+        hot: '#ff3b30',
+        arrived: '#4caf50'
     };
+
+    document.addEventListener("DOMContentLoaded", restoreMissionView);
+
+    function blankState() {
+        return {
+            path: [],
+            reached: false,
+            lastDistance: null,
+            lastHeat: "freezing",
+            lastAccuracy: null,
+            reachedAt: null
+        };
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return blankState();
+
+            const parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.path)) return blankState();
+
+            return {
+                ...blankState(),
+                ...parsed,
+                path: parsed.path
+                    .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+                    .slice(-MAX_PATH_POINTS)
+            };
+        } catch (err) {
+            console.warn("Unable to restore saved mission state:", err);
+            return blankState();
+        }
+    }
+
+    function saveState() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(missionState));
+        } catch (err) {
+            console.warn("Unable to save mission state:", err);
+            statusDisplay.innerText = "Tracking works, but this browser blocked local persistence.";
+        }
+    }
+
+    function restoreMissionView() {
+        applyHeat(missionState.lastHeat || "freezing");
+
+        if (missionState.path.length > 0) {
+            const last = missionState.path[missionState.path.length - 1];
+            initMap(last.lat, last.lon);
+            redrawSavedPath();
+            updateMarker(last.lat, last.lon, missionState.lastHeat || "freezing");
+            lastLatLng = [last.lat, last.lon];
+            map.setView(lastLatLng, 18);
+
+            if (Number.isFinite(missionState.lastDistance)) {
+                distanceDisplay.innerText = Math.round(missionState.lastDistance) + " meters";
+            }
+
+            legend.style.display = "block";
+            startBtn.innerText = missionState.reached ? "Restart GPS" : "Resume Nav-System";
+            statusDisplay.innerText = missionState.reached
+                ? "Waypoint already reached on this device. Reset to clear."
+                : "Saved trail restored. Resume when ready.";
+        }
+
+        if (missionState.reached) {
+            secretMessage.style.display = "block";
+            applyHeat("arrived");
+        }
+    }
 
     function startTracking() {
         if (!navigator.geolocation) {
@@ -209,113 +436,280 @@
             return;
         }
 
-        startBtn.style.display = "none";
+        if (watchId !== null) {
+            statusDisplay.innerText = "Nav-system already tracking.";
+            return;
+        }
+
+        startBtn.innerText = "Tracking...";
         statusDisplay.innerText = "Acquiring satellite lock...";
 
         watchId = navigator.geolocation.watchPosition(
-            updateLocation, 
-            handleError, 
+            updateLocation,
+            handleError,
             { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
         );
+    }
+
+    function resetMission() {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+
+        missionState = blankState();
+        saveState();
+
+        if (map) {
+            map.remove();
+            map = null;
+        }
+
+        playerMarker = null;
+        targetMarker = null;
+        lastLatLng = null;
+
+        mapDiv.innerHTML = "";
+        mapDiv.style.display = "none";
+        legend.style.display = "none";
+        secretMessage.style.display = "none";
+        distanceDisplay.innerText = "-- m";
+        statusDisplay.innerText = "Mission reset. Waiting for GPS authorization...";
+        startBtn.innerText = "Initialize Nav-System";
+
+        applyHeat("freezing");
+        document.body.classList.remove("arrival-flash");
+        topNotice.classList.remove("show");
     }
 
     function initMap(lat, lon) {
         mapDiv.style.display = "block";
         legend.style.display = "block";
 
+        if (map) {
+            setTimeout(() => map.invalidateSize(), 50);
+            return;
+        }
+
         map = L.map('map', {
-            zoomControl: false 
+            zoomControl: false
         }).setView([lat, lon], 18);
 
-        // Dark-mode themed map tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // Brighter map tiles.
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap &copy; CartoDB',
             maxZoom: 20
         }).addTo(map);
 
-        playerMarker = L.circleMarker([lat, lon], {
-            color: '#fff',
+        targetMarker = L.circleMarker([targetLat, targetLon], {
+            color: '#ffffff',
             weight: 2,
-            fillColor: colors.freezing,
-            fillOpacity: 1,
-            radius: 6
-        }).addTo(map);
+            fillColor: colors.arrived,
+            fillOpacity: 0.9,
+            radius: 8
+        }).addTo(map).bindTooltip("Target", { permanent: false });
+
+        setTimeout(() => map.invalidateSize(), 80);
+    }
+
+    function redrawSavedPath() {
+        if (!map || missionState.path.length === 0) return;
+
+        for (let i = 1; i < missionState.path.length; i++) {
+            const prev = missionState.path[i - 1];
+            const curr = missionState.path[i];
+            drawSegment([prev.lat, prev.lon], [curr.lat, curr.lon], curr.color || colors.freezing);
+        }
+    }
+
+    function getHeat(distance) {
+        if (distance <= unlockRadius) return "arrived";
+        if (distance < 50) return "hot";
+        if (distance < 120) return "warm";
+        if (distance < 250) return "cold";
+        return "freezing";
     }
 
     function getHeatColor(distance) {
-        if (distance <= unlockRadius) return colors.arrived;
-        if (distance < 50) return colors.hot;
-        if (distance < 120) return colors.warm;
-        if (distance < 250) return colors.cold;
-        return colors.freezing;
+        return colors[getHeat(distance)];
+    }
+
+    function applyHeat(heat) {
+        document.body.classList.remove("heat-freezing", "heat-cold", "heat-warm", "heat-hot", "heat-arrived");
+        document.body.classList.add("heat-" + heat);
+    }
+
+    function updateMarker(lat, lon, heat) {
+        const latLng = [lat, lon];
+        const color = colors[heat] || colors.freezing;
+
+        if (!playerMarker) {
+            playerMarker = L.circleMarker(latLng, {
+                color: '#ffffff',
+                weight: 2,
+                fillColor: color,
+                fillOpacity: 1,
+                radius: 7
+            }).addTo(map);
+        } else {
+            playerMarker.setLatLng(latLng);
+            playerMarker.setStyle({ fillColor: color });
+        }
+    }
+
+    function drawSegment(fromLatLng, toLatLng, color) {
+        // Glow underlay
+        L.polyline([fromLatLng, toLatLng], {
+            color: color,
+            weight: 12,
+            opacity: 0.22,
+            lineCap: 'round'
+        }).addTo(map);
+
+        // Bright path core
+        L.polyline([fromLatLng, toLatLng], {
+            color: color,
+            weight: 5,
+            opacity: 0.92,
+            lineCap: 'round'
+        }).addTo(map);
+    }
+
+    function maybeAddPathPoint(lat, lon, heat, color, distance, accuracy) {
+        const last = missionState.path[missionState.path.length - 1];
+
+        if (last) {
+            const moved = calculateDistance(last.lat, last.lon, lat, lon);
+            if (moved < 1 && !missionState.reached) {
+                return false;
+            }
+        }
+
+        missionState.path.push({
+            lat,
+            lon,
+            heat,
+            color,
+            distance: Math.round(distance),
+            accuracy: Math.round(accuracy),
+            ts: Date.now()
+        });
+
+        if (missionState.path.length > MAX_PATH_POINTS) {
+            missionState.path = missionState.path.slice(-MAX_PATH_POINTS);
+        }
+
+        return true;
     }
 
     function updateLocation(position) {
         const currentLat = position.coords.latitude;
         const currentLon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
-
         const distance = calculateDistance(currentLat, currentLon, targetLat, targetLon);
         const currentLatLng = [currentLat, currentLon];
+
+        const heat = getHeat(distance);
+        const currentColor = colors[heat];
 
         if (!map) {
             initMap(currentLat, currentLon);
             lastLatLng = currentLatLng;
         }
 
-        const currentColor = getHeatColor(distance);
+        applyHeat(heat);
+        updateMarker(currentLat, currentLon, heat);
 
-        playerMarker.setLatLng(currentLatLng);
-        playerMarker.setStyle({ fillColor: currentColor });
+        const added = maybeAddPathPoint(currentLat, currentLon, heat, currentColor, distance, accuracy);
+        if (lastLatLng && added) {
+            drawSegment(lastLatLng, currentLatLng, currentColor);
+        }
+
+        lastLatLng = currentLatLng;
         map.setView(currentLatLng);
 
-        if (lastLatLng[0] !== currentLatLng[0] || lastLatLng[1] !== currentLatLng[1]) {
-            L.polyline([lastLatLng, currentLatLng], {
-                color: currentColor,
-                weight: 6,
-                opacity: 0.8,
-                lineCap: 'round'
-            }).addTo(map);
-        }
-        
-        lastLatLng = currentLatLng; 
-
         distanceDisplay.innerText = Math.round(distance) + " meters";
-        distanceDisplay.style.color = currentColor;
-        
+
+        missionState.lastDistance = distance;
+        missionState.lastHeat = heat;
+        missionState.lastAccuracy = accuracy;
+
         if (distance <= unlockRadius) {
-            statusDisplay.innerText = "Target Confirmed.";
-            secretMessage.style.display = "block"; 
-            
-            map.panTo([targetLat, targetLon]);
-            navigator.geolocation.clearWatch(watchId);
+            reachWaypoint();
         } else {
             if (distance < 50) statusDisplay.innerText = `🔥 HOT! Almost there! (±${Math.round(accuracy)}m)`;
             else if (distance < 120) statusDisplay.innerText = `🟡 WARM. You're on the right track. (±${Math.round(accuracy)}m)`;
             else if (distance < 250) statusDisplay.innerText = `❄️ COLD. Keep moving. (±${Math.round(accuracy)}m)`;
             else statusDisplay.innerText = `🧊 FREEZING. You are far away. (±${Math.round(accuracy)}m)`;
         }
+
+        saveState();
+    }
+
+    function reachWaypoint() {
+        if (!missionState.reached) {
+            missionState.reached = true;
+            missionState.reachedAt = Date.now();
+            flashArrivalNotice();
+        }
+
+        applyHeat("arrived");
+        statusDisplay.innerText = "Target Confirmed.";
+        secretMessage.style.display = "block";
+
+        if (map) map.panTo([targetLat, targetLon]);
+
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+
+        startBtn.innerText = "Restart GPS";
+        saveState();
+    }
+
+    function flashArrivalNotice() {
+        topNotice.classList.remove("show");
+        void topNotice.offsetWidth; // restart animation
+        topNotice.classList.add("show");
+
+        document.body.classList.remove("arrival-flash");
+        void document.body.offsetWidth; // restart animation
+        document.body.classList.add("arrival-flash");
+
+        setTimeout(() => {
+            document.body.classList.remove("arrival-flash");
+        }, 5200);
     }
 
     function handleError(error) {
-        statusDisplay.innerText = "GPS Signal Lost. Step outside or check permissions.";
-        startBtn.style.display = "block"; 
+        watchId = null;
         startBtn.innerText = "Retry Connection";
+
+        if (error && error.code === error.PERMISSION_DENIED) {
+            statusDisplay.innerText = "GPS permission denied. Allow location access, then retry.";
+        } else if (error && error.code === error.POSITION_UNAVAILABLE) {
+            statusDisplay.innerText = "GPS position unavailable. Step outside or check signal.";
+        } else if (error && error.code === error.TIMEOUT) {
+            statusDisplay.innerText = "GPS timed out. Try again, ideally outdoors.";
+        } else {
+            statusDisplay.innerText = "GPS Signal Lost. Step outside or check permissions.";
+        }
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; 
-        const φ1 = lat1 * Math.PI/180;
-        const φ2 = lat2 * Math.PI/180;
-        const Δφ = (lat2-lat1) * Math.PI/180;
-        const Δλ = (lon2-lon1) * Math.PI/180;
+        const R = 6371e3;
+        const phi1 = lat1 * Math.PI / 180;
+        const phi2 = lat2 * Math.PI / 180;
+        const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+        const deltaLambda = (lon2 - lon1) * Math.PI / 180;
 
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                  Math.cos(phi1) * Math.cos(phi2) *
+                  Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return R * c; 
+        return R * c;
     }
 </script>
 
